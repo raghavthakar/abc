@@ -49,3 +49,8 @@ include_directories(
 add_executable(move_distance_server src/move_distance_server.cpp)
 target_link_libraries(move_distance_server ${catkin_LIBRARIES})
 add_dependencies(move_distance_server abc_control_gencpp)
+
+# MOVE DISTANCE CLIENT EXECUTABLE
+add_executable(move_distance_client src/move_distance_client.cpp)
+target_link_libraries(move_distance_client ${catkin_LIBRARIES})
+add_dependencies(move_distance_client abc_control_gencpp)

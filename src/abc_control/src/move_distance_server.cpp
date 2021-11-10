@@ -92,55 +92,79 @@ class Mover
         else if(angle_to_target<-3.14)
             angle_to_target+=3.14;
 
-        ROS_INFO("Returning");
         return angle_to_target;
     }
 
     void move(const abc_control::MoveDistanceGoalConstPtr& goal)
     {
+        // tracks the success of the action
+        bool action_success=true;
+
+        // to store the feedback to be returned
+        abc_control::MoveDistanceFeedback feedback;
+        // to store the goal to be returned
+        abc_control::MoveDistanceResult result;
+
         ROS_INFO_STREAM("In the callback");
-        for(int i=0; i<100; i++)
+        current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
+
+        double angle_to_target=getAngleToTarget(goal->target.y, current_odom->
+                                      pose.pose.position.y, goal->target.x,
+                                      current_odom->pose.pose.position.x);
+
+        ROS_INFO("TARGET X: %f Y: %f", goal->target.x, goal->target.y);
+
+        //linear velocity will always be this
+        twist_message.linear.x=BASE_LINEAR_VEL;
+
+        //Move the robot forwards till we reach the target
+        while(fabs(distanceFrom(goal->target.x, goal->target.y))>0.1)
         {
-            ROS_INFO_STREAM("In the loop");
-            ROS_INFO_STREAM(odom_topic);
-            current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
-
-            double angle_to_target=getAngleToTarget(goal->target.y, current_odom->
-                                          pose.pose.position.y, goal->target.x,
-                                          current_odom->pose.pose.position.x);
-
-            ROS_INFO("TARGET X: %f Y: %f", goal->target.x, goal->target.y);
-
-            //linear velocity will always be this
-            twist_message.linear.x=BASE_LINEAR_VEL;
-
-            //Move the robot forwards till we reach the target
-            while(fabs(distanceFrom(goal->target.x, goal->target.y))>0.1)
+            // handle preempt request
+            if(server.isPreemptRequested() || !ros::ok())
             {
-                //Get the current odom data of the robot
-                current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
-
-                double yaw_error= getAngleToTarget(goal->target.y, current_odom->
-                                              pose.pose.position.y, goal->target.x,
-                                              current_odom->pose.pose.position.x) - getCurrentYaw();
-
-                // For angular controller
-                double p_effort=yaw_error*KP;
-
-                // Set the angular yaw
-                twist_message.angular.z=p_effort;
-
-                twist_publisher.publish(twist_message);
-                ROS_INFO("DISTANCE TO TARGET: %f", distanceFrom(goal->target.x, goal->target.y));
-                ROS_INFO("YAW ERROR: %f", yaw_error);
-                ROS_INFO("P EFFORT: %f", p_effort);
+                ROS_WARN("Preempt requested");
+                server.setPreempted();
+                action_success=false;
             }
 
-            //Stop the robot
-            twist_message.angular.z=0;
-            twist_message.linear.x=0;
+            //Get the current odom data of the robot
+            current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
+
+            double yaw_error= getAngleToTarget(goal->target.y, current_odom->
+                                          pose.pose.position.y, goal->target.x,
+                                          current_odom->pose.pose.position.x) - getCurrentYaw();
+
+            // For angular controller
+            double p_effort=yaw_error*KP;
+
+            // Set the angular yaw
+            twist_message.angular.z=p_effort;
+
             twist_publisher.publish(twist_message);
+            ROS_INFO("DISTANCE TO TARGET: %f", distanceFrom(goal->target.x, goal->target.y));
+            ROS_INFO("YAW ERROR: %f", yaw_error);
+            ROS_INFO("P EFFORT: %f", p_effort);
+
+            // STORE THe feedback
+            feedback.distance_left=(double)fabs(distanceFrom(goal->target.x, goal->target.y));
+            // publish the feedback (distance from target)
+            server.publishFeedback(feedback);
         }
+
+        // flow is here if either success or failure of action
+        // if success
+        if(action_success)
+        {
+            ROS_INFO("Action succeeded!");
+            result.current_pose=current_odom->pose.pose;
+            server.setSucceeded(result);
+        }
+
+        //Stop the robot
+        twist_message.angular.z=0;
+        twist_message.linear.x=0;
+        twist_publisher.publish(twist_message);
     }
 
 public:

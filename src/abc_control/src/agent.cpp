@@ -29,6 +29,13 @@ int main(int argc, char**argv)
     // send the goal
     client.sendGoal(goal);
 
+    usleep(5);
+
+    goal.target.x=-5;
+
+    // send the goal
+    client.sendGoal(goal);
+
     //wait for the action to return
     bool finished_before_timeout = client.waitForResult();
 

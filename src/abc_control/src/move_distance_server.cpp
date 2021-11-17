@@ -14,10 +14,10 @@
 #include <abc_control/MoveDistanceFeedback.h>
 
 // linear velocity of the robot
-#define BASE_LINEAR_VEL 0.15
+#define BASE_LINEAR_VEL 0.5
 
 const double KP=0.5;
-const double DT=0.15;
+const double DT=0.65;
 
 class Mover
 {
@@ -28,15 +28,18 @@ class Mover
     std::string twist_topic;
     geometry_msgs::Twist twist_message;
     ros::Publisher twist_publisher;
+    ros::Subscriber odom_subscriber;
+
+    void odom_callback(nav_msgs::OdometryConstPtr msg)
+    {
+        ROS_INFO("In the callback");
+        current_odom=msg;
+    }
 
     std::vector<double> getOrientation()
     {
         double roll, pitch, yaw;
         std::vector<double> angles;
-
-        //Get the current odom data of the robot
-        current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
-
         // the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
         tf::Quaternion quat;
         tf::quaternionMsgToTF(current_odom->pose.pose.orientation, quat);
@@ -54,9 +57,6 @@ class Mover
     double getCurrentYaw()
     {
         double roll, pitch, yaw;
-
-        //Get the current odom data of the robot
-        current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
 
         // the incoming geometry_msgs::Quaternion is transformed to a tf::Quaterion
         tf::Quaternion quat;
@@ -105,9 +105,6 @@ class Mover
         // to store the goal to be returned
         abc_control::MoveDistanceResult result;
 
-        ROS_INFO_STREAM("In the callback");
-        current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
-
         double angle_to_target=getAngleToTarget(goal->target.y, current_odom->
                                       pose.pose.position.y, goal->target.x,
                                       current_odom->pose.pose.position.x);
@@ -128,9 +125,6 @@ class Mover
                 action_success=false;
             }
 
-            //Get the current odom data of the robot
-            current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);
-
             double yaw_error= getAngleToTarget(goal->target.y, current_odom->
                                           pose.pose.position.y, goal->target.x,
                                           current_odom->pose.pose.position.x) - getCurrentYaw();
@@ -142,14 +136,15 @@ class Mover
             twist_message.angular.z=p_effort;
 
             twist_publisher.publish(twist_message);
-            ROS_INFO("DISTANCE TO TARGET: %f", distanceFrom(goal->target.x, goal->target.y));
-            ROS_INFO("YAW ERROR: %f", yaw_error);
-            ROS_INFO("P EFFORT: %f", p_effort);
+            // ROS_INFO("DISTANCE TO TARGET: %f", distanceFrom(goal->target.x, goal->target.y));
+            // ROS_INFO("YAW ERROR: %f", yaw_error);
+            // ROS_INFO("P EFFORT: %f", p_effort);
 
             // STORE THe feedback
             feedback.distance_left=(double)fabs(distanceFrom(goal->target.x, goal->target.y));
             // publish the feedback (distance from target)
             server.publishFeedback(feedback);
+            ros::spinOnce();
         }
 
         // flow is here if either success or failure of action
@@ -165,6 +160,7 @@ class Mover
         twist_message.angular.z=0;
         twist_message.linear.x=0;
         twist_publisher.publish(twist_message);
+
     }
 
 public:
@@ -183,6 +179,10 @@ public:
 
         twist_publisher = node_handle.advertise
                           <geometry_msgs::Twist>(twist_topic, 10);
+
+        odom_subscriber = node_handle.subscribe(odom_topic, 15, &Mover::odom_callback, this);
+
+        current_odom=ros::topic::waitForMessage<nav_msgs::Odometry>(odom_topic);;
 
         server.start();
     }

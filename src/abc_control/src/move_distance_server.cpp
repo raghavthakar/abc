@@ -14,7 +14,7 @@
 #include <abc_control/MoveDistanceFeedback.h>
 
 // linear velocity of the robot
-#define BASE_LINEAR_VEL 0.5
+#define BASE_LINEAR_VEL 0.25
 
 const double KP=0.5;
 const double DT=0.65;
@@ -32,7 +32,7 @@ class Mover
 
     void odom_callback(nav_msgs::OdometryConstPtr msg)
     {
-        ROS_INFO("In the callback");
+        // ROS_INFO("In the callback");
         current_odom=msg;
     }
 

@@ -169,13 +169,9 @@ public:
     {
         ROS_INFO_STREAM("in the constructor");
         // setting up the variables that will be used throughout
-        odom_topic=odom_topic.append("/");
-        odom_topic=odom_topic.append(argv[1]);
-        odom_topic=odom_topic.append("/abc/odom");
+        odom_topic=odom_topic.append("odom");
 
-        twist_topic=twist_topic.append("/");
-        twist_topic=twist_topic.append(argv[1]);
-        twist_topic=twist_topic.append("/abc/cmd_vel");
+        twist_topic=twist_topic.append("cmd_vel");
 
         twist_publisher = node_handle.advertise
                           <geometry_msgs::Twist>(twist_topic, 10);

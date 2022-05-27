@@ -13,6 +13,14 @@
       <arg name="verbose" value="$(arg verbose)"/>
     </include>
 
+    <!-- 0 -->
+    <include file="$(find abc_description)/launch/abc_spawn.launch">
+        <arg name="ns" value="robot0"/>
+        <arg name="X" value="-0.5"/>
+        <arg name="Y" value="0.5"/>
+        <arg name="Z" value="0"/>
+    </include>
+
     <!-- 1 -->
     <include file="$(find abc_description)/launch/abc_spawn.launch">
         <arg name="ns" value="robot1"/>
@@ -20,28 +28,4 @@
         <arg name="Y" value="0.5"/>
         <arg name="Z" value="0"/>
     </include>
-
-    <!-- 2 -->
-    <!-- <include file="$(find abc_description)/launch/abc_spawn.launch">
-        <arg name="ns" value="robot2"/>
-        <arg name="X" value="-0.5"/>
-        <arg name="Y" value="0.5"/>
-        <arg name="Z" value="0"/>
-    </include> -->
-
-    <!-- 3 -->
-    <!-- <include file="$(find abc_description)/launch/abc_spawn.launch">
-        <arg name="ns" value="robot3"/>
-        <arg name="X" value="-0.5"/>
-        <arg name="Y" value="-0.5"/>
-        <arg name="Z" value="0"/>
-    </include> -->
-
-    <!-- 4 -->
-    <!-- <include file="$(find abc_description)/launch/abc_spawn.launch">
-        <arg name="ns" value="robot4"/>
-        <arg name="X" value="0.5"/>
-        <arg name="Y" value="-0.5"/>
-        <arg name="Z" value="0"/>
-    </include> -->
 </launch>

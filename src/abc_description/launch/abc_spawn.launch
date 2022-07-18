@@ -14,6 +14,7 @@
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" args="-urdf -model $(arg ns) -param robot_description -x  $(arg X) -y  $(arg Y) -z  $(arg Z)"/>
 
     <node name="move_distance_server" pkg="abc_control" type="move_distance_server" args="$(arg ns)" output="screen"/>
-    <node name="move_distance_client" pkg="abc_control" type="move_distance_client" args="$(arg ns)" output="screen"/>
+    <!-- <node name="move_distance_client" pkg="abc_control" type="move_distance_client" args="$(arg ns)" output="screen"/> -->
+    <node name="agent" pkg="abc_control" type="agent" output="screen"/>
   </group>
 </launch>

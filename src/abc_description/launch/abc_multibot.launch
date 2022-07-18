@@ -16,16 +16,16 @@
     <!-- 0 -->
     <include file="$(find abc_description)/launch/abc_spawn.launch">
         <arg name="ns" value="robot0"/>
-        <arg name="X" value="-0.5"/>
-        <arg name="Y" value="0.5"/>
+        <arg name="X" value="0"/>
+        <arg name="Y" value="0"/>
         <arg name="Z" value="0"/>
     </include>
 
     <!-- 1 -->
-    <include file="$(find abc_description)/launch/abc_spawn.launch">
+    <!-- <include file="$(find abc_description)/launch/abc_spawn.launch">
         <arg name="ns" value="robot1"/>
         <arg name="X" value="0.5"/>
         <arg name="Y" value="0.5"/>
         <arg name="Z" value="0"/>
-    </include>
+    </include> -->
 </launch>

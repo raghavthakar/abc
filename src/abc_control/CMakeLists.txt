@@ -46,7 +46,7 @@ include_directories(
 )
 
 # MOVE DISTANCE SERVER EXECUTABLE
-add_executable(move_distance_server src/move_distance_server.cpp)
+add_executable(move_distance_server src/move_distance_obstacle_avoidance_server.cpp)
 target_link_libraries(move_distance_server ${catkin_LIBRARIES})
 add_dependencies(move_distance_server abc_control_gencpp)
 
@@ -54,3 +54,8 @@ add_dependencies(move_distance_server abc_control_gencpp)
 add_executable(move_distance_client src/move_distance_client.cpp)
 target_link_libraries(move_distance_client ${catkin_LIBRARIES})
 add_dependencies(move_distance_client abc_control_gencpp)
+
+# INDIVIDUAL AGENT EXECUTABLE
+add_executable(agent src/agent.cpp)
+target_link_libraries(agent ${catkin_LIBRARIES})
+add_dependencies(agent abc_control_gencpp)

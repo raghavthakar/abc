@@ -1,4 +1,4 @@
-# alpha-beta-coordination
+# alpha-beta coordination
 Collective search by mobile robots using alpha-beta coordination
 
 This repository contains an implementation of the concept introduced in
